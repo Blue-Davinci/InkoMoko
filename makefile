@@ -96,10 +96,16 @@ test/cover:
 .PHONY: compose/up
 compose/up:
 	@echo "Starting services with docker-compose..."
-	docker-compose up -d
+	docker-compose up -d --build
 	@echo "Services started! API available at http://localhost"
-	@echo "Health check: curl http://localhost/health"
-	@echo "Metrics: curl http://localhost/metrics"
+	@echo "Health check: curl http://localhost/v1/health"
+	@echo "Metrics: curl http://localhost/v1/health/metrics"
+	@echo "Use 'make compose/logs' to see logs"
+
+.PHONY: compose/up/foreground
+compose/up/foreground:
+	@echo "Starting services with docker-compose (foreground)..."
+	docker-compose up --build
 
 .PHONY: compose/down
 compose/down:
@@ -107,13 +113,42 @@ compose/down:
 	docker-compose down
 	@echo "Services stopped!"
 
+.PHONY: compose/down/clean
+compose/down/clean:
+	@echo "Stopping and cleaning up docker-compose services..."
+	docker-compose down --volumes --remove-orphans
+	@echo "Services stopped and cleaned up!"
+
 .PHONY: compose/logs
 compose/logs:
 	@echo "Showing service logs..."
 	docker-compose logs -f
 
+.PHONY: compose/logs/api
+compose/logs/api:
+	@echo "Showing API service logs..."
+	docker-compose logs -f api
+
+.PHONY: compose/logs/nginx
+compose/logs/nginx:
+	@echo "Showing nginx service logs..."
+	docker-compose logs -f nginx
+
 .PHONY: compose/restart
 compose/restart: compose/down compose/up
+
+.PHONY: compose/rebuild
+compose/rebuild:
+	@echo "Rebuilding and restarting services..."
+	docker-compose down
+	docker-compose build --no-cache
+	docker-compose up -d
+	@echo "Services rebuilt and restarted!"
+
+.PHONY: compose/status
+compose/status:
+	@echo "Checking service status..."
+	docker-compose ps
 
 # ==================================================================================== #
 # DOCKER
