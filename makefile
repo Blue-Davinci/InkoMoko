@@ -8,6 +8,9 @@ help:
 	@echo "  make test        - Run tests"
 	@echo "  make clean       - Clean up build artifacts"
 	@echo "  make tidy        - Tidy and vendor dependencies"
+	@echo "  make compose/up  - Start with nginx (production-like)"
+	@echo "  make compose/down - Stop compose services"
+	@echo "  make docker/build - Build Docker image"
 	@echo ""
 	@echo "Docker commands:"
 	@echo "  make docker/build  - Build Docker image"
@@ -85,6 +88,36 @@ test/cover:
 	@echo "Running tests with coverage..."
 	go test -v -race -buildvcs -coverprofile=/tmp/coverage.out ./...
 	go tool cover -html=/tmp/coverage.out
+
+# ==================================================================================== #
+# DOCKER COMPOSE
+# ==================================================================================== #
+
+.PHONY: compose/up
+compose/up:
+	@echo "Starting services with docker-compose..."
+	docker-compose up -d
+	@echo "Services started! API available at http://localhost"
+	@echo "Health check: curl http://localhost/health"
+	@echo "Metrics: curl http://localhost/metrics"
+
+.PHONY: compose/down
+compose/down:
+	@echo "Stopping docker-compose services..."
+	docker-compose down
+	@echo "Services stopped!"
+
+.PHONY: compose/logs
+compose/logs:
+	@echo "Showing service logs..."
+	docker-compose logs -f
+
+.PHONY: compose/restart
+compose/restart: compose/down compose/up
+
+# ==================================================================================== #
+# DOCKER
+# ==================================================================================== #
 
 # ==================================================================================== #
 # OPERATIONS
