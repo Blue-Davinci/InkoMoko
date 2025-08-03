@@ -1,0 +1,47 @@
+# Checkov configuration for Terraform security scanning
+# See https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html
+
+# Directories to scan
+directory:
+  - depoyment/terraform
+
+# Output format
+output:
+  - cli
+  - json
+
+# Skip specific checks (customize as needed)
+skip-check:
+  # Skip checks that don't apply to simple Terraform state bucket
+  - CKV_AWS_18    # S3 bucket access logging - overkill for state bucket
+  - CKV_AWS_144   # S3 bucket cross-region replication - unnecessary complexity
+  - CKV2_AWS_62   # S3 event notifications - not needed for state bucket
+  - CKV_AWS_21    # S3 bucket versioning - we handle this explicitly
+  # Note: We'll implement CKV2_AWS_61 (lifecycle) and CKV_AWS_145 (KMS encryption)
+
+# Severity levels to report
+check:
+  - CRITICAL
+  - HIGH
+  - MEDIUM
+  # Skip LOW severity for cleaner output
+
+# Framework-specific settings
+framework:
+  - terraform
+  - terraform_plan
+
+# Custom policies directory (if you create any)
+# external-checks-dir: ./custom-policies
+
+# Quiet mode (reduce verbose output)
+quiet: false
+
+# Compact output
+compact: true
+
+# Download external modules for scanning
+download-external-modules: true
+
+# Create a baseline file for future runs
+# baseline: .checkov.baseline
