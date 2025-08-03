@@ -8,6 +8,14 @@ help:
 	@echo "  make test        - Run tests"
 	@echo "  make clean       - Clean up build artifacts"
 	@echo "  make tidy        - Tidy and vendor dependencies"
+	@echo ""
+	@echo "Docker commands:"
+	@echo "  make docker/build  - Build Docker image"
+	@echo "  make docker/run    - Run container (foreground)"
+	@echo "  make docker/dev    - Run container (background)"
+	@echo "  make docker/stop   - Stop running containers"
+	@echo "  make docker/clean  - Stop containers and remove image"
+	@echo "  make docker/logs   - Show container logs"
 
 # ==================================================================================== #
 # QUALITY CONTROL
@@ -97,4 +105,30 @@ docker/build:
 .PHONY: docker/run
 docker/run:
 	@echo "Running Docker container..."
-	docker run -p 4000:4000 inkomoko:latest 
+	docker run -p 4000:4000 inkomoko:latest
+
+.PHONY: docker/dev
+docker/dev:
+	@echo "Running Docker container in background..."
+	docker run -d -p 4000:4000 --name inkomoko-api inkomoko:latest
+	@echo "Container started. Use 'make docker/logs' to see output"
+
+.PHONY: docker/stop
+docker/stop:
+	@echo "Stopping inkomoko containers..."
+	docker stop $$(docker ps -q --filter ancestor=inkomoko:latest) 2>/dev/null || true
+	docker stop inkomoko-api 2>/dev/null || true
+	docker rm $$(docker ps -aq --filter ancestor=inkomoko:latest) 2>/dev/null || true
+	docker rm inkomoko-api 2>/dev/null || true
+
+.PHONY: docker/clean
+docker/clean: docker/stop
+	@echo "Removing inkomoko image..."
+	docker rmi inkomoko:latest 2>/dev/null || true
+
+.PHONY: docker/logs
+docker/logs:
+	@echo "Showing container logs..."
+	docker logs inkomoko-api 2>/dev/null || \
+	docker logs $$(docker ps -q --filter ancestor=inkomoko:latest) 2>/dev/null || \
+	echo "No running inkomoko containers found" 
