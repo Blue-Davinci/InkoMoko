@@ -8,9 +8,30 @@ help:
 	@echo "  make test        - Run tests"
 	@echo "  make clean       - Clean up build artifacts"
 	@echo "  make tidy        - Tidy and vendor dependencies"
-	@echo "  make compose/up  - Start with nginx (production-like)"
-	@echo "  make compose/down - Stop compose services"
-	@echo "  make docker/build - Build Docker image"
+	@echo ""
+	@echo "Quality Control:"
+	@echo "  make audit              - Run comprehensive quality checks"
+	@echo "  make pre-commit/install - Install pre-commit hooks"
+	@echo "  make pre-commit/run     - Run pre-commit on all files"
+	@echo "  make pre-commit/update  - Update pre-commit hooks"
+	@echo "  make checkov/scan       - Run Checkov security scan"
+	@echo "  make terraform/security - Run Terraform security checks"
+	@echo "  make format             - Format Go and Terraform code"
+	@echo ""
+	@echo "Terraform (see depoyment/terraform/Makefile for full commands):"
+	@echo "  make terraform/help     - Show Terraform-specific commands"
+	@echo ""
+	@echo "Docker Compose commands:"
+	@echo "  make compose/up          - Start services (nginx + API)"
+	@echo "  make compose/up/foreground - Start services in foreground"
+	@echo "  make compose/down        - Stop services"
+	@echo "  make compose/down/clean  - Stop services + cleanup volumes"
+	@echo "  make compose/logs        - Show all service logs"
+	@echo "  make compose/logs/api    - Show API logs only"
+	@echo "  make compose/logs/nginx  - Show nginx logs only"
+	@echo "  make compose/restart     - Restart all services"
+	@echo "  make compose/rebuild     - Rebuild and restart services"
+	@echo "  make compose/status      - Check service status"
 	@echo ""
 	@echo "Docker commands:"
 	@echo "  make docker/build  - Build Docker image"
@@ -39,6 +60,60 @@ audit:
 	go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 	go test -race -buildvcs -vet=off ./...
+
+# ==================================================================================== #
+# PRE-COMMIT HOOKS
+# ==================================================================================== #
+
+.PHONY: pre-commit/install
+pre-commit/install:
+	@echo "Installing pre-commit hooks..."
+	pre-commit install
+	@echo "Pre-commit hooks installed!"
+
+.PHONY: pre-commit/run
+pre-commit/run:
+	@echo "Running pre-commit hooks on all files..."
+	pre-commit run --all-files
+
+.PHONY: pre-commit/update
+pre-commit/update:
+	@echo "Updating pre-commit hooks..."
+	pre-commit autoupdate
+	@echo "Pre-commit hooks updated!"
+
+.PHONY: checkov/scan
+checkov/scan:
+	@echo "Running Checkov security scan..."
+	checkov --config-file .checkov.yml --directory ./depoyment/terraform/
+
+.PHONY: format
+format:
+	@echo "Formatting Go code..."
+	gofmt -w .
+	@echo "Formatting Terraform code..."
+	terraform fmt -recursive ./depoyment/terraform/
+	@echo "Code formatting complete!"
+
+# ==================================================================================== #
+# TERRAFORM HELPERS
+# ==================================================================================== #
+
+.PHONY: terraform/help
+terraform/help:
+	@echo "For Terraform commands, use the dedicated Makefile:"
+	@echo "  cd depoyment/terraform && make help"
+	@echo ""
+	@echo "Quick shortcuts from root directory:"
+	@echo "  make -C depoyment/terraform backend/setup"
+	@echo "  make -C depoyment/terraform dev/setup"
+	@echo "  make -C depoyment/terraform staging/setup"
+
+.PHONY: terraform/security
+terraform/security:
+	@echo "Running Terraform security checks..."
+	@make -C depoyment/terraform security
+	@echo "Terraform security scan complete!"
 
 # ==================================================================================== #
 # BUILD
@@ -199,4 +274,4 @@ docker/logs:
 	@echo "Showing container logs..."
 	docker logs inkomoko-api 2>/dev/null || \
 	docker logs $$(docker ps -q --filter ancestor=inkomoko:latest) 2>/dev/null || \
-	echo "No running inkomoko containers found" 
+	echo "No running inkomoko containers found"

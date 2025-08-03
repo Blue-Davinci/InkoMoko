@@ -1,0 +1,80 @@
+# Pre-commit configuration for Go and Terraform
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-case-conflict
+
+  # Go specific checks
+  - repo: local
+    hooks:
+      - id: go-fmt
+        name: go fmt
+        entry: gofmt
+        language: system
+        args: [-w]
+        files: \.go$
+
+      - id: go-vet
+        name: go vet
+        entry: go
+        language: system
+        args: [vet, ./...]
+        files: \.go$
+        pass_filenames: false
+
+      - id: go-test
+        name: go test
+        entry: go
+        language: system
+        args: [test, -race, -short, ./...]
+        files: \.go$
+        pass_filenames: false
+
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: go
+        language: system
+        args: [mod, tidy]
+        files: go\.(mod|sum)$
+        pass_filenames: false
+
+  # Terraform specific checks
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.99.5
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-recursive
+          - --args=-diff
+        files: \.tf$
+
+      - id: terraform_validate
+        args:
+          - --hook-config=--retry-once-with-cleanup=true
+          - --hook-config=--init-args=-backend=false
+        files: \.tf$
+
+  # Security and compliance scanning
+  - repo: https://github.com/bridgecrewio/checkov
+    rev: 3.2.457
+    hooks:
+      - id: checkov
+        args:
+          - --config-file
+          - .checkov.yml
+          - --quiet
+          - --compact
+          - --directory
+          - depoyment/terraform/
+        files: \.tf$
+        exclude: ^\.terraform/

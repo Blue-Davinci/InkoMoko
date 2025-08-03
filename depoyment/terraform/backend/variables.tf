@@ -1,10 +1,17 @@
-variable "s3_bucket_name" {
-  description = "The name of the S3 bucket to store the Terraform state file."
+variable "bucket_name" {
+  description = "The name of the S3 bucket to store Terraform state files."
   type        = string
-  default     = "inkomoko-terraform-state"
+  default     = "tfstate-dev-bucket-test-123"
 }
-variable "provider_region" {
-  description = "The region for our s3 bucket"
+
+variable "environment" {
+  description = "The environment for which the Terraform state is being managed (e.g., dev, staging, prod)."
+  type        = string
+  default     = "dev"
+}
+
+variable "region" {
+  description = "The AWS region where the S3 bucket will be created."
   type        = string
   default     = "us-east-1"
 }
