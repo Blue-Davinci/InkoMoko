@@ -1,0 +1,191 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, particularly when used with LiteIDE
+*.out
+coverage.html
+coverage.xml
+coverage.txt
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Go module proxy cache
+/pkg/
+/src/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.staging
+.env.production
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node_modules (if you have any Node.js tools)
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Docker build cache
+.docker/
+
+# Kubernetes
+*.kubeconfig
+kubeconfig*
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+terraform.tfplan
+terraform.tfplan.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Ansible
+*.retry
+.vault_pass
+
+# AWS
+.aws/
+
+# Azure
+.azure/
+
+# GCP
+.gcp/
+gcp-key.json
+service-account*.json
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Cache
+.cache/
+*cache*
+
+# Build artifacts
+build/
+out/
+
+# Documentation build
+docs/_build/
+site/
+
+# Test results
+test-results/
+junit.xml
+
+# Monitoring and observability
+*.prof
+*.trace
+
+# Local development
+local/
+.local/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Application specific
+config/local.yaml
+config/development.yaml
+uploads/
+storage/
