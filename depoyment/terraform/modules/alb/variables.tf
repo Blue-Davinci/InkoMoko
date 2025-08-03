@@ -23,3 +23,34 @@ variable "enable_alb_deletion" {
   type        = bool
   default     = false
 }
+
+# SSL/TLS Certificate Variables
+variable "domain_name" {
+  description = "The primary domain name for the SSL certificate"
+  type        = string
+  default     = ""
+}
+
+variable "subject_alternative_names" {
+  description = "Additional domain names for the SSL certificate"
+  type        = list(string)
+  default     = []
+}
+
+variable "route53_zone_id" {
+  description = "The Route53 hosted zone ID for DNS validation"
+  type        = string
+  default     = ""
+}
+
+variable "create_www_redirect" {
+  description = "Whether to create a www subdomain redirect"
+  type        = bool
+  default     = true
+}
+
+variable "enable_https" {
+  description = "Whether to enable HTTPS with SSL certificate"
+  type        = bool
+  default     = false
+}
