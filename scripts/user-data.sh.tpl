@@ -57,7 +57,7 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            
+
             # Health check timeouts
             proxy_connect_timeout 1s;
             proxy_send_timeout 3s;
@@ -69,7 +69,7 @@ http {
             proxy_pass http://api/v1/health/metrics;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
-            
+
             # Restrict to VPC CIDR block (will be replaced by Terraform)
             allow ${vpc_cidr_block};
             allow 127.0.0.1;
@@ -80,18 +80,18 @@ http {
         location /v1/ {
             # Apply rate limiting
             limit_req zone=api_limit burst=20 nodelay;
-            
+
             proxy_pass http://api;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            
+
             # Timeouts
             proxy_connect_timeout 5s;
             proxy_send_timeout 60s;
             proxy_read_timeout 60s;
-            
+
             # Buffer settings
             proxy_buffering on;
             proxy_buffer_size 4k;

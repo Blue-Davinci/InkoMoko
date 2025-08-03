@@ -189,3 +189,6 @@ config/local.yaml
 config/development.yaml
 uploads/
 storage/
+# Pre-commit artifacts
+.pre-commit-cache/
+*.tfplan
