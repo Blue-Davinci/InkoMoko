@@ -27,3 +27,13 @@ output "listener_arn" {
   description = "The ARN of the load balancer listener"
   value       = aws_lb_listener.main.arn
 }
+
+output "alb_security_group_id" {
+  description = "The security group ID of the ALB"
+  value       = aws_security_group.alb_sg.id
+}
+
+output "target_group_resource_label" {
+  description = "Resource label for ALB target tracking scaling policies"
+  value       = "${aws_lb.main.arn_suffix}/${aws_lb_target_group.main.arn_suffix}"
+}

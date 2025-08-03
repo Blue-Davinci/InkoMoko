@@ -20,3 +20,18 @@ module "alb" {
   tags                = var.tags
   enable_alb_deletion = var.enable_alb_deletion
 }
+
+module "compute" {
+  source = "../../modules/compute"
+
+  vpc_id                         = module.networking.vpc_id
+  vpc_cidr                       = var.vpc_cidr
+  tags                           = var.tags
+  alb_sg_id                      = module.alb.alb_security_group_id
+  instance_prefix                = "my-instance-${var.environment}"
+  instance_ami                   = var.instance_ami
+  instance_type                  = var.instance_type
+  private_subnet_ids             = module.networking.private_subnet_ids_list
+  target_group_arn               = module.alb.target_group_arn
+  target_tracking_resource_label = module.alb.target_group_resource_label
+}

@@ -15,3 +15,18 @@ output "environment" {
   description = "The environment for which these outputs are defined"
   value       = var.environment
 }
+
+output "instance_private_ips" {
+  description = "Private IP addresses of instances in the development environment"
+  value       = module.compute.instance_private_ips
+}
+
+output "alb_dns_name" {
+  description = "The DNS name of the Application Load Balancer"
+  value       = module.alb.alb_dns_name
+}
+
+output "application_url" {
+  description = "The URL to access the application"
+  value       = "http://${module.alb.alb_dns_name}"
+}
