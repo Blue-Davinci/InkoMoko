@@ -23,9 +23,14 @@ output "target_group_name" {
   value       = aws_lb_target_group.main.name
 }
 
-output "listener_arn" {
-  description = "The ARN of the load balancer listener"
-  value       = aws_lb_listener.main.arn
+output "http_listener_arn" {
+  description = "The ARN of the HTTP load balancer listener"
+  value       = aws_lb_listener.http.arn
+}
+
+output "https_listener_arn" {
+  description = "The ARN of the HTTPS load balancer listener"
+  value       = var.enable_https && var.domain_name != "" && var.route53_zone_id != "" ? aws_lb_listener.https[0].arn : null
 }
 
 output "alb_security_group_id" {
@@ -36,4 +41,14 @@ output "alb_security_group_id" {
 output "target_group_resource_label" {
   description = "Resource label for ALB target tracking scaling policies"
   value       = "${aws_lb.main.arn_suffix}/${aws_lb_target_group.main.arn_suffix}"
+}
+
+output "certificate_arn" {
+  description = "The ARN of the SSL certificate"
+  value       = var.enable_https && var.domain_name != "" && var.route53_zone_id != "" ? aws_acm_certificate.main[0].arn : null
+}
+
+output "domain_name" {
+  description = "The domain name associated with the certificate"
+  value       = var.enable_https && var.domain_name != "" ? var.domain_name : null
 }

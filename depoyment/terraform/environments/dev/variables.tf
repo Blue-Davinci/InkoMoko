@@ -62,3 +62,9 @@ variable "enable_alb_deletion" {
   type        = bool
   default     = false
 }
+
+variable "docker_image_url" {
+  description = "The Docker image URL to deploy"
+  type        = string
+  default     = "ghcr.io/blue-davinci/inkomoko"
+}

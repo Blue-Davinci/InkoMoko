@@ -6,7 +6,15 @@
   **A production POC Application for InkoMoko**
 
   [![CI/CD](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/ci-cd.yml)
-  [![Infrastructure](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/infrastructure-ops.yml/badge.svg)](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/infrastructure-ops.yml)
+  [![Infrastruct## 📞 Support
+
+For questions, issues, or contributions:
+
+- **Issues**: GitHub Issues
+- **Pull Requests**: Welcome and encouraged
+- **Architecture Questions**: See documentation links above
+
+---s://github.com/Blue-Davinci/InkoMoko/actions/workflows/infrastructure-ops.yml/badge.svg)](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/infrastructure-ops.yml)
   [![Dependencies](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/dependencies.yml/badge.svg)](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/dependencies.yml)
 
   [![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
@@ -363,7 +371,27 @@ Transfer/sec:      1.40MB
 - **AWS Provider**: ~> 5.0
 - **Infrastructure State**: Terraform Cloud/AWS S3 Backend
 
-## 📞 Support
+## � Documentation
+
+### Quick Start Guides
+- **[HTTP Deployment](docs/QUICK_HTTPS_SETUP.md)** - Deploy with HTTP-only (immediate testing)
+- **[HTTPS Setup](docs/HTTPS_IMPLEMENTATION.md)** - Complete HTTPS implementation guide
+
+### Architecture & Infrastructure
+- **[GitHub Actions Workflows](.github/README.md)** - CI/CD pipeline documentation
+- **[Terraform Modules](depoyment/terraform/README.md)** - Infrastructure as Code details
+
+### Access Methods
+
+| Method | URL Format | Requirements | Security |
+|--------|------------|--------------|----------|
+| **HTTP (Testing)** | `http://alb-dns-name/health` | None | ⚠️ Development only |
+| **HTTPS (Production)** | `https://yourdomain.com/health` | Custom domain + Route53 | ✅ SSL/TLS encrypted |
+
+> **💡 Important**: You cannot access ALB via HTTPS using its DNS name (e.g., `my-alb-123.elb.amazonaws.com`).
+> HTTPS requires a custom domain and SSL certificate. The HTTP endpoint works immediately for testing.
+
+## �📞 Support
 
 For questions, issues, or contributions:
 

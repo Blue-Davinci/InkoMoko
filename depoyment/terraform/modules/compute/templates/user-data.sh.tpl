@@ -133,11 +133,29 @@ EOF
 # Add ec2-user to docker group for permissions
 usermod -a -G docker ec2-user
 
-# Pull and run your Docker container
+# Login to GitHub Container Registry (if using private registry)
+# Note: This requires GITHUB_TOKEN to be set in environment or instance role
+# For public images, this step can be skipped
+# echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_USERNAME" --password-stdin
+
+# Pull the latest Docker image
+echo "Pulling latest Docker image: ${docker_image_url}:latest"
+docker pull ${docker_image_url}:latest
+
+# Stop and remove any existing container
+docker stop inkomoko-api 2>/dev/null || true
+docker rm inkomoko-api 2>/dev/null || true
+
+# Run the Docker container with latest image
 docker run -d --name inkomoko-api \
   --restart unless-stopped \
   -p 127.0.0.1:4000:4000 \
-  ${docker_image_url}
+  --log-driver=awslogs \
+  --log-opt awslogs-group="/aws/ec2/inkomoko" \
+  --log-opt awslogs-region=us-east-1 \
+  --log-opt awslogs-stream="$(ec2-metadata --instance-id | cut -d ' ' -f 2)" \
+  -e ENVIRONMENT=production \
+  ${docker_image_url}:latest
 
 # Start nginx (Docker already started)
 systemctl start nginx
