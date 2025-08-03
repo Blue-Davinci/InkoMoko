@@ -20,10 +20,10 @@ COPY . .
 ARG TARGETOS
 ARG TARGETARCH
 
-# Build the application
+# Build the application with optimizations for cross-compilation
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -ldflags="-w -s -extldflags '-static' -X main.version=$(git describe --tags --always --dirty 2>/dev/null || echo 'docker-build')" \
-    -a -installsuffix cgo \
+    -trimpath \
     -o /app/bin/api \
     ./cmd/api
 
