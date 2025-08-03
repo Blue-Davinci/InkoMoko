@@ -44,3 +44,9 @@ variable "vpc_cidr" {
   description = "cidr range for the VPC"
   type        = string
 }
+
+variable "enable_alb_deletion" {
+  description = "value to enable ALB deletion protection"
+  type        = bool
+  default     = false
+}
