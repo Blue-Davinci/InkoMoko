@@ -71,7 +71,7 @@ jobs:
           gosec -fmt sarif -out gosec.sarif -severity medium -confidence medium ./... || echo "GoSec scan completed with findings"
 
       - name: Upload GoSec SARIF
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: gosec.sarif
@@ -104,21 +104,21 @@ jobs:
           terraform init -backend=false
           terraform validate
 
-          # Validate modules
-          cd ../modules/networking
+          # Validate modules - use absolute paths
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/networking
           terraform init -backend=false
           terraform validate
 
-          cd ../alb
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/alb
           terraform init -backend=false
           terraform validate
 
-          cd ../compute
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/compute
           terraform init -backend=false
           terraform validate
 
           # Validate environments
-          cd ../environments/dev
+          cd $GITHUB_WORKSPACE/depoyment/terraform/environments/dev
           terraform init -backend=false
           terraform validate
 
@@ -133,7 +133,7 @@ jobs:
           output_file_path: checkov.sarif
 
       - name: Upload Checkov SARIF
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: checkov.sarif
@@ -166,7 +166,7 @@ jobs:
             -o bin/inkomoko ./cmd/api
 
       - name: Upload Binary Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: inkomoko-binary
           path: bin/inkomoko
@@ -229,7 +229,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy Scan Results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
           category: trivy-filesystem

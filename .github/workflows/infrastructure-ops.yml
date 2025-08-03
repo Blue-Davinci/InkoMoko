@@ -45,24 +45,24 @@ jobs:
           terraform validate
           echo "Backend validation: PASSED"
 
-          # Validate modules
-          cd ../modules/networking
+          # Validate modules - use absolute paths
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/networking
           terraform init -backend=false
           terraform validate
           echo "Networking module validation: PASSED"
 
-          cd ../alb
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/alb
           terraform init -backend=false
           terraform validate
           echo "ALB module validation: PASSED"
 
-          cd ../compute
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/compute
           terraform init -backend=false
           terraform validate
           echo "Compute module validation: PASSED"
 
           # Validate environments
-          cd ../environments/dev
+          cd $GITHUB_WORKSPACE/depoyment/terraform/environments/dev
           terraform init -backend=false
           terraform validate
           echo "Development environment validation: PASSED"

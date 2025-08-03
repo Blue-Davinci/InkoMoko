@@ -15,11 +15,8 @@ graph TD
     D --> F[Infrastructure Validation]
     E --> G[Build & Test]
     F --> H[Build & Package]
-    G --> I[Deploy to Dev]
-    H --> J[Deploy to Prod]
-    I --> K[Health Check]
-    J --> L[Health Check]
-    L --> M[Docker Push to GHCR]
+    G --> I[Docker Push to GHCR]
+    H --> I
 ```
 
 ## 🛠️ Workflows
@@ -52,12 +49,6 @@ graph TD
 - **Container registry push** to GitHub Container Registry
 - **Artifact caching** for faster builds
 
-#### 🚀 **Deployment**
-- **Development environment** (on `development` branch)
-- **Production environment** (on `main` branch)
-- **Health checks** post-deployment
-- **Environment URLs** in GitHub UI
-
 ### 2. **Dependency Updates** (`.github/workflows/dependencies.yml`)
 
 **Schedule:** Every Monday at 9 AM UTC
@@ -80,16 +71,7 @@ graph TD
 
 ## 🛡️ Security Features
 
-### **Secrets Management**
-```yaml
-# Development Environment
-AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-# Production Environment (Separate Credentials)
-AWS_ACCESS_KEY_ID_PROD: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-AWS_SECRET_ACCESS_KEY_PROD: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-```
+**Note:** This workflow focuses on code quality, infrastructure validation, and Docker builds. AWS deployment sections have been removed for simplicity.
 
 ### **Security Scanning**
 - **GoSec:** Go code vulnerability scanning (medium+ severity)
@@ -99,26 +81,25 @@ AWS_SECRET_ACCESS_KEY_PROD: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
 - **Soft Failure:** Security scans report findings but don't block deployment
 
 ### **Access Control**
-- **Environment protection** rules for production
-- **Manual approval** required for destructive operations
-- **Separate AWS credentials** for each environment
-- **Least privilege** IAM policies
+- **GitHub Container Registry** authentication with GITHUB_TOKEN
+- **Repository-based permissions** for workflow execution
+- **Branch protection** rules for main/development branches
 
 ## 🎯 Quality Gates
 
-### **Pre-Deployment Checks**
+### **Pre-Build Checks**
 1. ✅ Code formatting (`gofmt`)
 2. ✅ Static analysis (`go vet`)
 3. ✅ Unit tests with race detection
-4. ✅ Security scanning (GoSec, Checkov)
+4. ✅ Security scanning (GoSec, Checkov, Trivy)
 5. ✅ Infrastructure validation
 6. ✅ Terraform formatting
 
-### **Post-Deployment Verification**
-1. ✅ Health check endpoints
-2. ✅ Application availability
-3. ✅ Infrastructure state validation
-4. ✅ Security compliance reports
+### **Build Verification**
+1. ✅ Binary compilation success
+2. ✅ Docker image build success
+3. ✅ Multi-architecture support
+4. ✅ Container registry push (main branch only)
 
 ## 📊 Monitoring & Observability
 
@@ -128,11 +109,11 @@ AWS_SECRET_ACCESS_KEY_PROD: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
 - **Docker image** multi-architecture support
 - **Cache optimization** for faster builds
 
-### **Deployment Tracking**
-- **Environment URLs** in GitHub Environments
-- **Deployment status** in pull requests
-- **Health check results** in workflow logs
-- **Infrastructure outputs** displayed in summaries
+### **Build Tracking**
+- **Build artifacts** with retention policies
+- **Docker image** multi-architecture support
+- **Container registry** integration with GitHub Packages
+- **Build status** in pull requests
 
 ## 🔧 Configuration Examples
 
@@ -161,35 +142,38 @@ env:
       BUILD_DATE=${{ github.event.head_commit.timestamp }}
 ```
 
-### **Terraform Deployment**
+### **Terraform Code Quality**
 ```yaml
-- name: 🏗️ Deploy Infrastructure
+- name: Terraform Format Check
   run: |
-    cd depoyment/terraform/environments/dev
-    terraform init
-    terraform plan -detailed-exitcode -out=tfplan
-    terraform apply -auto-approve tfplan
-    echo "application_url=$(terraform output -raw application_url)" >> $GITHUB_OUTPUT
+    cd depoyment/terraform
+    terraform fmt -check=true -diff=true -recursive
+
+- name: Terraform Validation
+  run: |
+    cd $GITHUB_WORKSPACE/depoyment/terraform/environments/dev
+    terraform init -backend=false
+    terraform validate
 ```
 
 ## 🚀 Usage Guide
 
-### **Automatic Deployments**
+### **Automatic Builds**
 
-1. **Development Environment:**
+1. **Development Branch:**
    ```bash
    git checkout development
    git commit -m "feature: add new functionality"
    git push origin development
-   # Triggers automatic deployment to dev environment
+   # Triggers quality checks and validation
    ```
 
-2. **Production Environment:**
+2. **Production Branch:**
    ```bash
    git checkout main
    git merge development
    git push origin main
-   # Triggers automatic deployment to production
+   # Triggers full pipeline with Docker image push
    ```
 
 ### **Manual Infrastructure Operations**
@@ -197,10 +181,9 @@ env:
 1. Go to **Actions** tab in GitHub
 2. Select **Infrastructure Operations** workflow
 3. Click **Run workflow**
-4. Choose:
-   - **Environment:** dev, staging, or prod
-   - **Operation:** plan, apply, destroy, refresh, validate
-   - **Auto-approve:** Enable for automatic execution
+4. Choose operation:
+   - **Validate:** Check Terraform syntax and structure
+   - **Format:** Auto-format Terraform code
 
 ### **Docker Image Access**
 
@@ -214,16 +197,15 @@ docker pull ghcr.io/blue-davinci/inkomoko:latest
 docker pull ghcr.io/blue-davinci/inkomoko:main-abc1234
 ```
 
-## 📋 Required Secrets
+## 📋 Required Setup
 
-Configure these secrets in your GitHub repository:
+No secrets required! The workflow uses:
 
-| Secret | Description | Environment |
-|--------|-------------|-------------|
-| `AWS_ACCESS_KEY_ID` | AWS access key for development | Development |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key for development | Development |
-| `AWS_ACCESS_KEY_ID_PROD` | AWS access key for production | Production |
-| `AWS_SECRET_ACCESS_KEY_PROD` | AWS secret key for production | Production |
+| Resource | Authentication | Purpose |
+|----------|----------------|---------|
+| `GITHUB_TOKEN` | Automatic | Docker registry push |
+| `actions/checkout@v4` | Automatic | Code checkout |
+| `codecov/codecov-action@v3` | Optional | Coverage reporting |
 
 ## 🏆 Best Practices Implemented
 
@@ -252,22 +234,13 @@ Configure these secrets in your GitHub repository:
 
 ### **Common Issues**
 
-**Failed Terraform Apply:**
+**Terraform Validation Failures:**
 ```bash
 # Check the workflow logs for detailed error messages
 # Common causes:
-# - AWS permissions
-# - Resource conflicts
-# - Invalid configuration
-```
-
-**Health Check Failures:**
-```bash
-# The pipeline waits up to 5 minutes for health checks
-# Common causes:
-# - Application startup time
-# - Security group configuration
-# - Load balancer configuration
+# - Invalid Terraform syntax
+# - Missing required variables
+# - Module dependency issues
 ```
 
 **Docker Build Failures:**
@@ -278,14 +251,12 @@ Configure these secrets in your GitHub repository:
 # - Dockerfile syntax issues
 ```
 
-### **Manual Recovery**
-
-If automated deployment fails, use the Infrastructure Operations workflow:
-
-1. Run **validate** operation to check configuration
-2. Run **plan** operation to preview changes
-3. Run **apply** with auto-approve if plan looks correct
-4. Check application health manually if needed
+**Security Scan Findings:**
+```bash
+# GoSec, Checkov, and Trivy will report findings but won't fail the build
+# Review findings in GitHub Security tab
+# Address high-severity issues as needed
+```
 
 ---
 
