@@ -4,9 +4,18 @@
 dnf update -y
 dnf install -y nginx docker
 
-# Enable services
-systemctl enable nginx
+# Enable and start Docker first (needed for image pull)
 systemctl enable docker
+systemctl start docker
+
+# Add ec2-user to docker group for permissions
+usermod -a -G docker ec2-user
+
+# Pull Docker image (before nginx to ensure it's available)
+docker pull ${docker_image_url}
+
+# Enable nginx
+systemctl enable nginx
 
 # Create nginx configuration
 cat > /etc/nginx/nginx.conf << 'EOF'
@@ -123,15 +132,19 @@ EOF
 usermod -a -G docker ec2-user
 
 # Pull and run your Docker container
-# Registry URL will be replaced by Terraform
 docker run -d --name inkomoko-api \
   --restart unless-stopped \
   -p 127.0.0.1:4000:4000 \
   ${docker_image_url}
 
-# Start services
-systemctl start docker
+# Start nginx (Docker already started)
 systemctl start nginx
+
+# Verify services are running
+sleep 5
+systemctl status nginx --no-pager
+systemctl status docker --no-pager
+docker ps
 
 # Enable CloudWatch agent
 # dnf install -y amazon-cloudwatch-agent

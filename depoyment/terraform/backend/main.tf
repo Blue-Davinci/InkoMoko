@@ -75,9 +75,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "tfstate-bucket-lifecycle" {
     id     = "terraform_state_lifecycle"
     status = "Enabled"
 
-    # Delete old versions after 30 days
+    # Apply to all objects in the bucket
+    filter {}
+
+    # Delete old versions after 90 days
     noncurrent_version_expiration {
-      noncurrent_days = 30
+      noncurrent_days = 90
     }
 
     # Clean up incomplete multipart uploads
@@ -85,7 +88,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "tfstate-bucket-lifecycle" {
       days_after_initiation = 7
     }
 
-    # Optional: Transition to cheaper storage after 30 days
+    # Transition to cheaper storage after 30 days (must be less than expiration)
     noncurrent_version_transition {
       noncurrent_days = 30
       storage_class   = "STANDARD_IA"
