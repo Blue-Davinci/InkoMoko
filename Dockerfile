@@ -16,8 +16,12 @@ RUN go mod download
 # Copy source code
 COPY . .
 
+# Build arguments for cross-compilation
+ARG TARGETOS
+ARG TARGETARCH
+
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -ldflags="-w -s -extldflags '-static' -X main.version=$(git describe --tags --always --dirty 2>/dev/null || echo 'docker-build')" \
     -a -installsuffix cgo \
     -o /app/bin/api \
