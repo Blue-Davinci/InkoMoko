@@ -1,0 +1,77 @@
+name: Infrastructure Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Infrastructure operation to perform'
+        required: true
+        default: 'validate'
+        type: choice
+        options:
+          - validate
+          - format
+
+env:
+  TERRAFORM_VERSION: '1.12.0'
+
+jobs:
+  infrastructure-ops:
+    name: Infrastructure Operations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Format
+        if: github.event.inputs.operation == 'format'
+        run: |
+          cd depoyment/terraform
+          terraform fmt -recursive
+
+      - name: Terraform Validation
+        if: github.event.inputs.operation == 'validate'
+        run: |
+          echo "Validating Terraform configurations..."
+
+          # Validate backend
+          cd depoyment/terraform/backend
+          terraform init -backend=false
+          terraform validate
+          echo "Backend validation: PASSED"
+
+          # Validate modules - use absolute paths
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/networking
+          terraform init -backend=false
+          terraform validate
+          echo "Networking module validation: PASSED"
+
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/alb
+          terraform init -backend=false
+          terraform validate
+          echo "ALB module validation: PASSED"
+
+          cd $GITHUB_WORKSPACE/depoyment/terraform/modules/compute
+          terraform init -backend=false
+          terraform validate
+          echo "Compute module validation: PASSED"
+
+          # Validate environments
+          cd $GITHUB_WORKSPACE/depoyment/terraform/environments/dev
+          terraform init -backend=false
+          terraform validate
+          echo "Development environment validation: PASSED"
+
+          echo "All Terraform configurations are valid!"
+
+      - name: Operation Summary
+        run: |
+          echo "## Infrastructure Operation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**Operation:** ${{ github.event.inputs.operation }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY

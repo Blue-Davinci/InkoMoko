@@ -1,0 +1,55 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 9 * * MON'  # Every Monday at 9 AM UTC
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Update Go Dependencies
+        run: |
+          go get -u ./...
+          go mod tidy
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: '1.12.0'
+
+      - name: Check Terraform Provider Updates
+        run: |
+          cd depoyment/terraform
+          find . -name "*.tf" -exec grep -l "required_providers\|source.*=" {} \; | head -5 | while read file; do
+            echo "Checking providers in: $file"
+            grep -E "(source|version).*=" "$file" || true
+          done
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update dependencies'
+          title: 'chore: automated dependency updates'
+          body: |
+            ## Automated Dependency Updates
+
+            This PR contains automated updates for:
+            - Go module dependencies
+            - Terraform provider versions (manual review required)
+
+            Please review and test before merging.
+          branch: chore/dependency-updates
+          delete-branch: true

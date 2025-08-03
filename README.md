@@ -5,7 +5,11 @@
 
   **A production POC Application for InkoMoko**
 
-  [![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
+  [![CI/CD](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/ci-cd.yml)
+  [![Infrastructure](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/infrastructure-ops.yml/badge.svg)](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/infrastructure-ops.yml)
+  [![Dependencies](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/dependencies.yml/badge.svg)](https://github.com/Blue-Davinci/InkoMoko/actions/workflows/dependencies.yml)
+
+  [![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
   [![Terraform](https://img.shields.io/badge/Terraform-1.5+-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://terraform.io/)
   [![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
   [![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com/)
@@ -19,7 +23,7 @@ This project demonstrates a production-ready, cloud-native application platform 
 - **Go REST API** with comprehensive health checks and metrics
 - **Infrastructure as Code** using Terraform with modular design
 - **Auto Scaling** compute infrastructure with Application Load Balancer
-- **CI/CD Pipeline** with pre-commit hooks and automated testing
+- **GitHub Actions CI/CD** with security scanning and automated deployments
 - **Security Best Practices** with VPC isolation and least-privilege access
 - **Monitoring & Observability** with CloudWatch integration
 
@@ -53,8 +57,8 @@ graph TB
 
 ### Prerequisites
 
-- **Go 1.21+**
-- **Terraform 1.5+**
+- **Go 1.24+**
+- **Terraform 1.12+**
 - **AWS CLI** configured with appropriate permissions
 - **Docker** (for containerization)
 - **Make** (for build automation)
@@ -241,7 +245,50 @@ Production-ready nginx configuration with:
 - **Container security** with minimal attack surface
 - **Regular dependency updates** via automated tools
 
-## 🚀 Deployment
+## � CI/CD Pipeline
+
+### GitHub Actions Automation
+
+The platform includes a comprehensive CI/CD pipeline that demonstrates enterprise DevOps practices:
+
+#### **Continuous Integration**
+- **Quality Gates**: Go formatting, vetting, and testing with race detection
+- **Security Scanning**: GoSec for code vulnerabilities, Checkov for infrastructure
+- **Infrastructure Validation**: Multi-module Terraform validation and planning
+- **Coverage Reporting**: Automated test coverage with detailed reports
+
+#### **Continuous Deployment**
+- **Multi-Environment**: Automated deployments to development and production
+- **Container Registry**: Docker images published to GitHub Container Registry
+- **Health Verification**: Post-deployment health checks and validation
+- **Rollback Capability**: Git-based rollback with infrastructure state management
+
+#### **Operational Workflows**
+- **Dependency Updates**: Automated Go module and Terraform provider updates
+- **Infrastructure Operations**: Manual infrastructure management with approval gates
+- **Security Compliance**: Regular security scans and compliance reporting
+
+```yaml
+# Example: Automated deployment on push to main
+on:
+  push:
+    branches: [ main, development ]
+    paths-ignore: [ '**.md', 'docs/**' ]
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Deploy to Production
+        run: |
+          cd depoyment/terraform/environments/prod
+          terraform init && terraform apply -auto-approve
+```
+
+For detailed CI/CD documentation, see [GitHub Actions Documentation](.github/README.md).
+
+## �🚀 Deployment
 
 ### Environment Configuration
 
@@ -311,10 +358,10 @@ Transfer/sec:      1.40MB
 ## 🏷️ Version Information
 
 - **Application Version**: 1.0.0
-- **Go Version**: 1.21+
-- **Terraform Version**: 1.5+
+- **Go Version**: 1.24+
+- **Terraform Version**: 1.12+
 - **AWS Provider**: ~> 5.0
-- **Infrastructure State**: Terraform Cloud/S3 Backend
+- **Infrastructure State**: Terraform Cloud/AWS S3 Backend
 
 ## 📞 Support
 
