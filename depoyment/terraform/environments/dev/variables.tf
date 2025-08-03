@@ -1,0 +1,64 @@
+variable "bucket_name" {
+  description = "The name of the S3 bucket to store Terraform state files."
+  type        = string
+}
+
+variable "bucket_region" {
+  description = "The AWS region where the S3 bucket will be created."
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "instance_ami" {
+  description = "The AMI ID to use for the EC2 instance."
+  type        = string
+  default     = "ami-08a6efd148b1f7504"
+}
+
+variable "instance_type" {
+  description = "The type of EC2 instance to launch."
+  type        = string
+  default     = "t2.micro"
+}
+
+variable "tags" {
+  description = "A map of tags to assign to the S3 bucket."
+  type        = map(string)
+  default = {
+    Environment = "Dev"
+    ManagedBy   = "InkoMoko"
+    CreatedBy   = "InkoMoko"
+  }
+}
+
+variable "public_subnets" {
+  description = "A map of public subnet CIDR blocks."
+  type = map(object({
+    cidr_block = string
+    az         = string
+  }))
+}
+
+variable "environment" {
+  description = "Environment"
+  type        = string
+}
+
+variable "private_subnets" {
+  description = "A map of private subnet CIDR blocks."
+  type = map(object({
+    cidr_block = string
+    az         = string
+  }))
+}
+
+variable "vpc_cidr" {
+  description = "cidr range for the VPC"
+  type        = string
+}
+
+variable "enable_alb_deletion" {
+  description = "value to enable ALB deletion protection"
+  type        = bool
+  default     = false
+}

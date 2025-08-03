@@ -1,7 +1,7 @@
 variable "bucket_name" {
   description = "The name of the S3 bucket to store Terraform state files."
   type        = string
-  default     = "tfstate-dev-bucket-test-123"
+  default     = "inkomoko-tfstate-dev-bucket"
 }
 
 variable "environment" {
