@@ -1,0 +1,16 @@
+# Quick HTTPS Test Configuration
+
+# Add these to your terraform.tfvars if you have a domain:
+enable_https = true
+domain_name = "api.yourdomain.com"        # Replace with your actual domain
+route53_zone_id = "Z1234567890ABC"        # Replace with your actual zone ID
+
+# Then update main.tf to pass these variables:
+# module "alb" {
+#   source = "../../modules/alb"
+#
+#   # ... existing config ...
+#   enable_https     = var.enable_https
+#   domain_name      = var.domain_name
+#   route53_zone_id  = var.route53_zone_id
+# }

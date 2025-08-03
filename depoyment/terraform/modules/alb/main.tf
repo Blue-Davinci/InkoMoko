@@ -17,12 +17,13 @@ resource "aws_lb" "main" {
   )
 }
 
-# ALB security group to allow incoming traffic on port 80 from the internet
+# ALB security group to allow incoming traffic on port 80 and 443 from the internet
 resource "aws_security_group" "alb_sg" {
   name        = "${var.alb_name}-sg"
-  description = "Allow HTTP inbound traffic"
+  description = "Allow HTTP and HTTPS inbound traffic"
   vpc_id      = var.vpc_id
-  # rules
+
+  # HTTP traffic on port 80
   ingress {
     description      = "Allow HTTP traffic on port 80"
     from_port        = 80
@@ -32,8 +33,22 @@ resource "aws_security_group" "alb_sg" {
     ipv6_cidr_blocks = []
     prefix_list_ids  = []
     security_groups  = []
-    self             = false # This is not a self-referencing security group
+    self             = false
   }
+
+  # HTTPS traffic on port 443
+  ingress {
+    description      = "Allow HTTPS traffic on port 443"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = []
+    prefix_list_ids  = []
+    security_groups  = []
+    self             = false
+  }
+
   # egress for all traffic to anywhere
   egress {
     description      = "Allow all outbound traffic from anywhere"
@@ -77,11 +92,49 @@ resource "aws_lb_target_group" "main" {
   )
 }
 
-# ALB Listener - forwards traffic to target group
-resource "aws_lb_listener" "main" {
+# ALB HTTP Listener - redirects to HTTPS if enabled, otherwise forwards to target group
+resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = "80"
   protocol          = "HTTP"
+
+  dynamic "default_action" {
+    for_each = var.enable_https && var.domain_name != "" ? [1] : []
+    content {
+      type = "redirect"
+
+      redirect {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+  }
+
+  dynamic "default_action" {
+    for_each = !var.enable_https || var.domain_name == "" ? [1] : []
+    content {
+      type             = "forward"
+      target_group_arn = aws_lb_target_group.main.arn
+    }
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.alb_name}-http-listener"
+    }
+  )
+}
+
+# ALB HTTPS Listener - forwards traffic to target group
+resource "aws_lb_listener" "https" {
+  count             = var.enable_https && var.domain_name != "" && var.route53_zone_id != "" ? 1 : 0
+  load_balancer_arn = aws_lb.main.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-2017-01"
+  certificate_arn   = aws_acm_certificate_validation.main[0].certificate_arn
 
   default_action {
     type             = "forward"
@@ -91,7 +144,7 @@ resource "aws_lb_listener" "main" {
   tags = merge(
     var.tags,
     {
-      Name = "${var.alb_name}-listener"
+      Name = "${var.alb_name}-https-listener"
     }
   )
 }
