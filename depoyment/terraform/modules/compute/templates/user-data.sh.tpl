@@ -2,11 +2,13 @@
 
 # Update system (Amazon Linux 2023 uses dnf)
 dnf update -y
-dnf install -y nginx docker
+dnf install -y nginx docker amazon-ssm-agent
 
-# Enable and start Docker first (needed for image pull)
+# Enable and start services (including SSM agent for Session Manager)
 systemctl enable docker
+systemctl enable amazon-ssm-agent
 systemctl start docker
+systemctl start amazon-ssm-agent
 
 # Add ec2-user to docker group for permissions
 usermod -a -G docker ec2-user
@@ -144,7 +146,17 @@ systemctl start nginx
 sleep 5
 systemctl status nginx --no-pager
 systemctl status docker --no-pager
+systemctl status amazon-ssm-agent --no-pager
 docker ps
+
+# Log service statuses for debugging
+echo "=== Service Status Summary ===" >> /var/log/user-data.log
+systemctl is-active nginx >> /var/log/user-data.log
+systemctl is-active docker >> /var/log/user-data.log
+systemctl is-active amazon-ssm-agent >> /var/log/user-data.log
+echo "=== Docker Container Status ===" >> /var/log/user-data.log
+docker ps >> /var/log/user-data.log 2>&1
+echo "=== User Data Complete ===" >> /var/log/user-data.log
 
 # Enable CloudWatch agent
 # dnf install -y amazon-cloudwatch-agent
